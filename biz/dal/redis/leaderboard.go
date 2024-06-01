@@ -1,4 +1,4 @@
-package rediscache
+package redis
 
 import (
 	"context"
@@ -17,12 +17,13 @@ func NewLeaderboardRedis(cli *redis.Client) *LeaderboardRedis {
 	return &LeaderboardRedis{cli}
 }
 
-func (c *LeaderboardRedis) CalculateUserScore(ctx context.Context, weight uint64, userID string, quizID string) error {
+func (c *LeaderboardRedis) CalculateUserScore(ctx context.Context, weight uint64,
+	 userID string, quizID string, userName string) error {
 	key := "leaderboard" + quizID
-	_, err := c.cli.ZRevRank(ctx, key, userID).Result()
+	_, err := c.cli.ZRevRank(ctx, key, userName).Result()
 	if err == redis.Nil {
 		// user belum ada di leaderboard, insert ke leadeer board dg score 0 + weight
-		_, err := c.cli.ZAdd(ctx, key, redis.Z{Score: float64(weight), Member: userID}).Result()
+		_, err := c.cli.ZAdd(ctx, key, redis.Z{Score: float64(weight), Member: userName}).Result()
 		if err != nil {
 			zap.L().Error(fmt.Sprintf("error (c.cli.ZAdd) (CalculateUserScore) (LeaderboardRedis)", zap.Error(err)))
 			return err
@@ -36,7 +37,7 @@ func (c *LeaderboardRedis) CalculateUserScore(ctx context.Context, weight uint64
 	}
 
 	// kalau sebelumnya userIDnya ada di redis , increment by weight (lastscore + weight)
-	_, err = c.cli.ZIncrBy(ctx, key, float64(weight), userID).Result()
+	_, err = c.cli.ZIncrBy(ctx, key, float64(weight), userName).Result()
 	if err != nil {
 		zap.L().Error("c.cli.ZIncrBy (CalculateUserScore) (LeaderboardRedis)", zap.Error(err))
 		return err
@@ -60,7 +61,7 @@ func (c *LeaderboardRedis) GetTopLeaderBoard(ctx context.Context, quizID string)
 	var leaderboards []domain.RedisLeaderBoard
 	for i := 0; i < len(l); i++ {
 		leaderboards = append(leaderboards, domain.RedisLeaderBoard{
-			UserID:   l[i].Member.(string),
+			Username:   l[i].Member.(string),
 			Score:    uint64(l[i].Score),
 			Position: uint64(i + 1),
 		})

@@ -8,7 +8,7 @@ type LeaderBoard struct {
 
 
 type RedisLeaderBoard struct {
-	UserID string `json:"user_id"`
+	Username string `json:"username"`
 	Position uint64 `json:"position"`
 	Score uint64 `json:"score"`
 }
