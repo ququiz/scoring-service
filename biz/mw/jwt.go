@@ -17,6 +17,7 @@ import (
 var (
 	// JwtMiddleware       *jwt.HertzJWTMiddleware
 	IdentityKey         = "sub"
+	Username            = "username"
 	PublicKeyAuthServer = "-----BEGIN PUBLIC KEY-----\nMIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQAodxwFdiFKWTG/ZU7vXPdk8ox+nNU\n1JmxsmI8i8tYrYf6QxmwBz13jS/PZsb8dJbMFY3YTMMih6SKz7e+cQ68IbgA7BnY\n5fYFQET4SNHVX/zaH6J70ERJLsRrarmWSXsNbMbnqXlIkoorYXeAn9vsLbr/RPw9\nDYaoq4JrQ+OGsc4LHMw=\n-----END PUBLIC KEY-----\n"
 )
 
@@ -43,6 +44,7 @@ func GetJwtMiddleware() *jwt.HertzJWTMiddleware {
 			if v, ok := data.(*User); ok {
 				return jwt.MapClaims{
 					IdentityKey: v.ID,
+					Username:    v.Username,
 				}
 			}
 			return jwt.MapClaims{}
@@ -50,7 +52,8 @@ func GetJwtMiddleware() *jwt.HertzJWTMiddleware {
 		IdentityHandler: func(ctx context.Context, c *app.RequestContext) interface{} {
 			claims := jwt.ExtractClaims(ctx, c)
 			return &User{
-				ID: claims[IdentityKey].(string),
+				ID:       claims[IdentityKey].(string),
+				Username: claims[Username].(string),
 			}
 		},
 		Authorizator: func(data interface{}, ctx context.Context, c *app.RequestContext) bool {
