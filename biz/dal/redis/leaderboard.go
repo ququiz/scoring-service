@@ -47,7 +47,7 @@ func (c *LeaderboardRedis) CalculateUserScore(ctx context.Context, weight uint64
 }
 
 func (c *LeaderboardRedis) GetTopLeaderBoard(ctx context.Context, quizID string) ([]domain.RedisLeaderBoard, error) {
-	key := "leaderboard" + quizID
+	key := "leaderboard:" + quizID
 	l, err := c.cli.ZRevRangeWithScores(ctx, key, 0, -1).Result()
 	if err == redis.Nil {
 		zap.L().Debug(fmt.Sprintf("leaderboard %s belum ada di sorted sets", key))
