@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"ququiz/lintang/scoring-service/biz/dal/mongodb"
 	"ququiz/lintang/scoring-service/biz/dal/rabbitmq"
 	"ququiz/lintang/scoring-service/biz/dal/redis"
 	"ququiz/lintang/scoring-service/biz/router"
 	"ququiz/lintang/scoring-service/biz/service"
+	"ququiz/lintang/scoring-service/biz/webapi"
 	"ququiz/lintang/scoring-service/config"
 	"ququiz/lintang/scoring-service/pkg"
 	"time"
@@ -16,6 +18,9 @@ import (
 	"github.com/hertz-contrib/cors"
 	"github.com/hertz-contrib/logger/accesslog"
 	"github.com/hertz-contrib/pprof"
+	"go.uber.org/zap"
+	grpcGo "google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -54,12 +59,33 @@ func main() {
 	// rabbitmq
 	rmq := rabbitmq.NewRabbitMQ(cfg)
 
+	// mongo
+	mongo := mongodb.NewMongo(cfg)
+
 	quizQueryConsumer := rabbitmq.NewQuizQueryMQConsumer(rmq, leaderboardRedis)
 	quizQueryConsumer.ListenAndServe()
 	pprof.Register(h)
 
+	// grpc conn
+	//grpc
+	cc, err := grpcGo.NewClient(cfg.GRPC.AuthGRPCClient+"?wait=30s", grpcGo.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		zap.L().Fatal("Newclient gprc (main)", zap.Error(err))
+	}
+
+	// rpc client
+	quizQueryClient := webapi.NewQuizQueryClient(cfg)
+	authClient := webapi.NewAuthClient(cc)
+
+	// repo
+	quizMongoRepo := mongodb.NewQuizRepository(mongo.Conn)
+
+	// producer
+	scoringProducer := rabbitmq.NewScoringMQ(rmq)
+	quizQueryProducer := rabbitmq.NewQuizQueryProducer(rmq)
+
 	// service
-	scoringSvc := service.NewScoringService(leaderboardRedis)
+	scoringSvc := service.NewScoringService(leaderboardRedis, quizQueryClient, quizMongoRepo, authClient, scoringProducer, quizQueryProducer)
 
 	// router
 	router.LeaderboardRouter(h, scoringSvc)

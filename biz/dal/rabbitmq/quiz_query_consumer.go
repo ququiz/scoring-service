@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
-	"ququiz/lintang/scoring-service/biz/dal/domain"
+	"ququiz/lintang/scoring-service/biz/domain"
 
 	"go.uber.org/zap"
 )

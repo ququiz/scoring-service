@@ -18,7 +18,7 @@ func NewRedis(cfg *config.Config) *Redis {
 	// })
 	cli := redis.NewClient(&redis.Options{
 		Addr: cfg.Redis.RedisAddr,
-		// Password: cfg.Redis.RedisPassword,
+		Password: cfg.Redis.RedisPassword,
 		DB: 0,
 	})
 

@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
-	"ququiz/lintang/scoring-service/biz/dal/domain"
+	"ququiz/lintang/scoring-service/biz/domain"
 
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
@@ -18,8 +18,8 @@ func NewLeaderboardRedis(cli *redis.Client) *LeaderboardRedis {
 }
 
 func (c *LeaderboardRedis) CalculateUserScore(ctx context.Context, weight uint64,
-	 userID string, quizID string, userName string) error {
-	key := "leaderboard" + quizID
+	userID string, quizID string, userName string) error {
+	key := "leaderboard:" + quizID
 	_, err := c.cli.ZRevRank(ctx, key, userName).Result()
 	if err == redis.Nil {
 		// user belum ada di leaderboard, insert ke leadeer board dg score 0 + weight
@@ -61,7 +61,7 @@ func (c *LeaderboardRedis) GetTopLeaderBoard(ctx context.Context, quizID string)
 	var leaderboards []domain.RedisLeaderBoard
 	for i := 0; i < len(l); i++ {
 		leaderboards = append(leaderboards, domain.RedisLeaderBoard{
-			Username:   l[i].Member.(string),
+			Username: l[i].Member.(string),
 			Score:    uint64(l[i].Score),
 			Position: uint64(i + 1),
 		})

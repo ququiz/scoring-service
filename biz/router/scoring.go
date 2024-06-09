@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"ququiz/lintang/scoring-service/biz/dal/domain"
+	"ququiz/lintang/scoring-service/biz/domain"
 	"ququiz/lintang/scoring-service/biz/router/middleware"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -13,6 +13,7 @@ import (
 
 type ScoringService interface {
 	GetLeaderboard(ctx context.Context, quizID string) ([]domain.LeaderBoard, error)
+	RecapQuiz(ctx context.Context, quizID string) error
 }
 
 type LeaderboardHandler struct {
@@ -29,6 +30,14 @@ func LeaderboardRouter(r *server.Hertz, s ScoringService) {
 		lH := root.Group("/scoring")
 		{
 			lH.GET("/:quizID/leaderboard", append(middleware.Protected(), handler.GetLeaderboard)...)
+		}
+	}
+
+	dkron := r.Group("/scoring-internal")
+	{
+		rH := dkron.Group("/recap")
+		{
+			rH.POST("/:quizID", handler.RecapQuiz)
 		}
 	}
 }
@@ -60,6 +69,33 @@ func (l *LeaderboardHandler) GetLeaderboard(ctx context.Context, c *app.RequestC
 	}
 
 	c.JSON(http.StatusOK, getLeaderboardRes{Leaderboard: leaderboard})
+}
+
+type recapQuizReq struct {
+	QuizID string `path:"quizID"`
+}
+
+type dkronRes struct {
+	Message string `json:"message"`
+}
+
+func (l *LeaderboardHandler) RecapQuiz(ctx context.Context, c *app.RequestContext) {
+	var req recapQuizReq
+	err := c.BindAndValidate(&req)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
+		return
+	}
+
+	err = l.svc.RecapQuiz(ctx, req.QuizID)
+	if err != nil {
+		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dkronRes{Message: "ok"})
+
 }
 
 func getStatusCode(err error) int {

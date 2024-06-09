@@ -28,7 +28,6 @@ func NewRabbitMQ(cfg *config.Config) *RabbitMQ {
 		zap.L().Fatal("error can't get rabbitmq cahnnel: " + err.Error())
 	}
 
-
 	err = channel.Qos(
 		1, 0,
 		false,
