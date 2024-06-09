@@ -1,3 +1,3 @@
-docker build . -t lintangbirdas/scoring-service:8
-docker tag lintangbirdas/scoring-service:8 lintangbirdas/scoring-service:8
-docker push lintangbirdas/scoring-service:8
+docker build . -t lintangbirdas/scoring-service:9
+docker tag lintangbirdas/scoring-service:9 lintangbirdas/scoring-service:9
+docker push lintangbirdas/scoring-service:9
