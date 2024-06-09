@@ -96,11 +96,7 @@ func main() {
 	}) // health probes
 	router.LeaderboardRouter(h, scoringSvc)
 
-	// var callback []route.CtxCallback
 
-	// // service & router
-	// mongo := mongodb.NewMongo(cfg)
-	// rds := rediscache.NewRedis(cfg)
 
 	h.Spin()
 }
