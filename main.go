@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"ququiz/lintang/scoring-service/biz/dal/mongodb"
 	"ququiz/lintang/scoring-service/biz/dal/rabbitmq"
 	"ququiz/lintang/scoring-service/biz/dal/redis"
@@ -13,6 +15,7 @@ import (
 	"time"
 
 	"github.com/bytedance/gopkg/util/gopool"
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/hertz-contrib/cors"
@@ -88,6 +91,9 @@ func main() {
 	scoringSvc := service.NewScoringService(leaderboardRedis, quizQueryClient, quizMongoRepo, authClient, scoringProducer, quizQueryProducer)
 
 	// router
+	h.GET("/healthz", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(http.StatusOK, "service is healthy")
+	}) // health probes
 	router.LeaderboardRouter(h, scoringSvc)
 
 	// var callback []route.CtxCallback
