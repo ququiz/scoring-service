@@ -37,6 +37,7 @@ func (a *AuthClient) GetUsersByIds(ctx context.Context, userIDs []string) ([]dom
 
 	var usernames []domain.User
 	for i := 0; i < len(res.Users); i++ {
+		zap.L().Debug("user from grpc: ", zap.String("userEmail", res.Users[i].Email))
 		usernames = append(usernames, domain.User{
 			ID:       res.Users[i].Id,
 			Username: res.Users[i].Username,

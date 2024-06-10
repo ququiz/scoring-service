@@ -28,39 +28,41 @@ func NewQuizQueryMQConsumer(r *RabbitMQ, l LeaderboardRedis) *QuizQueryMQConsume
 const rabbitMQConsumerName = "scoring-svc-consumer"
 
 func (r *QuizQueryMQConsumer) ListenAndServe() error {
-	queue, err := r.rmq.Channel.QueueDeclare(
-		"",
-		false, // durable
-		false, // delete when unused
-		true,  // exclusive
-		false, // no-wait
-		nil,   // arguments
-	)
-	if err != nil {
-		zap.L().Fatal("cant create new queue (r.rmq.Channel.QueueDeclare) (ListenAndServe) (RMQConsumer) ", zap.Error(err))
+	// queue, err := r.rmq.Channel.QueueDeclare(
+	// 	"",
+	// 	false, // durable
+	// 	false, // delete when unused
+	// 	true,  // exclusive
+	// 	false, // no-wait
+	// 	nil,   // arguments
+	// )
+	// if err != nil {
+	// 	zap.L().Fatal("cant create new queue (r.rmq.Channel.QueueDeclare) (ListenAndServe) (RMQConsumer) ", zap.Error(err))
 
-	}
-	err = r.rmq.Channel.QueueBind(
-		queue.Name,
-		"correct-answer",
-		"scoring-quiz-query",
-		false,
-		nil,
-	)
-	if err != nil {
-		zap.L().Fatal(fmt.Sprintf("cant bind queue %s to exchange scoring-quiz-query", queue.Name))
-	}
+	// }
+	// err = r.rmq.Channel.QueueBind(
+	// 	"scoringQuizQueryQueue",
+	// 	"correct-answer",
+	// 	"scoring-quiz-query",
+	// 	false,
+	// 	nil,
+	// ) // kalo gini tadi malah consume message duplikat
+
+	// if err != nil {
+	// 	zap.L().Fatal(fmt.Sprintf("cant bind queue %s to exchange scoring-quiz-query", "scoringQuizQueryQueue"))
+	// } //malah consume message yg sama berkali kali di setiap replica
+
 	msgs, err := r.rmq.Channel.Consume(
-		queue.Name,
-		rabbitMQConsumerName,
-		false, // auto-ack
+		"scoringQuizQueryQueue",
+		"",    // harus kosong
+		false, // auto-ack # autoo ack bikin gak consume mesage asw
 		false, // exclusive
 		false, // no-local
 		false, // no-wait
 		nil,   // args
 	)
 	if err != nil {
-		zap.L().Fatal(fmt.Sprint("cant consume message from queue %s", queue.Name))
+		zap.L().Fatal(fmt.Sprint("cant consume message from queue %s", "scoringQuizQueryQueue"), zap.Error(err))
 	}
 
 	go func() {
@@ -90,7 +92,7 @@ func (r *QuizQueryMQConsumer) ListenAndServe() error {
 			}
 
 			if nack {
-				zap.L().Info(fmt.Sprintf("NAcking message from queue %s", queue.Name))
+				zap.L().Info(fmt.Sprintf("NAcking message from queue %s", "scoringQuizQueryQueue"))
 
 				_ = msg.Nack(false, nack)
 			} else {
@@ -102,6 +104,7 @@ func (r *QuizQueryMQConsumer) ListenAndServe() error {
 			zap.L().Info("No more messages to consume. Extiing.")
 
 		}
+		zap.L().Info(" Extiing. consumer")
 	}()
 
 	return nil

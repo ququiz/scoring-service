@@ -74,6 +74,7 @@ func (s *ScoringService) RecapQuiz(ctx context.Context, quizID string) error {
 	}
 	participantsIDs, quizName, err := s.quizQueryClient.GetParticipantsUserIDs(ctx, quizID)
 	if err != nil {
+		zap.L().Debug("participants from quiz query service: ", zap.Strings("participaantsID", participantsIDs))
 		zap.L().Error(" s.quizQueryClient.GetParticipantsUserIDs (RecapQuiz) (ScoringService)", zap.Error(err))
 		return err
 	}
@@ -91,7 +92,10 @@ func (s *ScoringService) RecapQuiz(ctx context.Context, quizID string) error {
 
 	var participantsScoreMap map[string]ParticipantScore = make(map[string]ParticipantScore)
 	for i := 0; i < len(l); i++ {
+
 		participant := participantsDetails[i]
+		zap.L().Debug("participant from grpc: ", zap.String("userEmail", participant.Email))
+
 		participantsScoreMap[participant.ID] = ParticipantScore{
 			Score:    lMap[participant.Username],
 			Username: participant.Username,
@@ -119,6 +123,7 @@ func (s *ScoringService) RecapQuiz(ctx context.Context, quizID string) error {
 	leaderboards := []domain.UserRanks{}
 
 	for _, participant := range participantsScoreMap {
+		zap.L().Debug("user email: ", zap.String("userEmail", participant.Email))
 
 		leaderboards = append(leaderboards, domain.UserRanks{
 			Email:    participant.Email,

@@ -18,7 +18,7 @@ type QuizQueryClient struct {
 func NewQuizQueryClient(cfg *config.Config) *QuizQueryClient {
 	c, err := quizqueryservice.NewClient("quizQueryGRPCService", client.WithHostPorts(cfg.QueryQueryGRPC))
 	if err != nil {
-		zap.L().Fatal(" quizqueryservice.NewClient")
+		zap.L().Fatal(" quizqueryservice.NewClient", zap.Error(err))
 	}
 
 	return &QuizQueryClient{c}
@@ -37,7 +37,7 @@ func (q *QuizQueryClient) GetParticipantsUserIDs(ctx context.Context, quizID str
 	
 	res, err := q.service.GetQuizParticipants(grpcCtx, req)
 	if err != nil {
-		zap.L().Error("q.service.GetQuizParticipants (GetParticipantsUserIDs) (QuizQueryClient)")
+		zap.L().Error("q.service.GetQuizParticipants (GetParticipantsUserIDs) (QuizQueryClient)", zap.Error(err))
 		return []string{}, "", err 
 	}
 	return res.UserIds, res.QuizName, nil 
