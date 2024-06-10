@@ -23,6 +23,8 @@ func (a *AuthClient) GetUsersByIds(ctx context.Context, userIDs []string) ([]dom
 	grpcCtx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
 	defer cancel()
 
+	zap.L().Debug("userIDs: ", zap.Strings("userIDs", userIDs))
+
 	req := &pb.GetUserRequestByIds{
 		Ids: userIDs,
 	}

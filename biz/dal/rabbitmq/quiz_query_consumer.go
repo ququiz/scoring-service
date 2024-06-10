@@ -28,30 +28,19 @@ func NewQuizQueryMQConsumer(r *RabbitMQ, l LeaderboardRedis) *QuizQueryMQConsume
 const rabbitMQConsumerName = "scoring-svc-consumer"
 
 func (r *QuizQueryMQConsumer) ListenAndServe() error {
-	queue, err := r.rmq.Channel.QueueDeclare(
-		"",
-		false, // durable
-		false, // delete when unused
-		true,  // exclusive
-		false, // no-wait
-		nil,   // arguments
-	)
-	if err != nil {
-		zap.L().Fatal("cant create new queue (r.rmq.Channel.QueueDeclare) (ListenAndServe) (RMQConsumer) ", zap.Error(err))
-
-	}
-	err = r.rmq.Channel.QueueBind(
-		queue.Name,
+	
+	err := r.rmq.Channel.QueueBind(
+		"user-add-score",
 		"correct-answer",
 		"scoring-quiz-query",
 		false,
 		nil,
 	)
 	if err != nil {
-		zap.L().Fatal(fmt.Sprintf("cant bind queue %s to exchange scoring-quiz-query", queue.Name))
+		zap.L().Fatal(fmt.Sprintf("cant bind queue %s to exchange scoring-quiz-query", "user-add-score"))
 	}
 	msgs, err := r.rmq.Channel.Consume(
-		queue.Name,
+		"user-add-score",
 		rabbitMQConsumerName,
 		false, // auto-ack
 		false, // exclusive
@@ -60,7 +49,7 @@ func (r *QuizQueryMQConsumer) ListenAndServe() error {
 		nil,   // args
 	)
 	if err != nil {
-		zap.L().Fatal(fmt.Sprint("cant consume message from queue %s", queue.Name))
+		zap.L().Fatal(fmt.Sprint("cant consume message from queue %s", "user-add-score"))
 	}
 
 	go func() {
@@ -90,7 +79,7 @@ func (r *QuizQueryMQConsumer) ListenAndServe() error {
 			}
 
 			if nack {
-				zap.L().Info(fmt.Sprintf("NAcking message from queue %s", queue.Name))
+				zap.L().Info(fmt.Sprintf("NAcking message from queue %s", "user-add-score"))
 
 				_ = msg.Nack(false, nack)
 			} else {

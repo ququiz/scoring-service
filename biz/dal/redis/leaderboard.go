@@ -20,6 +20,7 @@ func NewLeaderboardRedis(cli *redis.Client) *LeaderboardRedis {
 func (c *LeaderboardRedis) CalculateUserScore(ctx context.Context, weight uint64,
 	userID string, quizID string, userName string) error {
 	key := "leaderboard:" + quizID
+	zap.L().Debug(fmt.Sprintf(`user points nambah: %s`, weight))
 	_, err := c.cli.ZRevRank(ctx, key, userName).Result()
 	if err == redis.Nil {
 		// user belum ada di leaderboard, insert ke leadeer board dg score 0 + weight

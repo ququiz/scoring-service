@@ -1,0 +1,12 @@
+db.base_quiz.updateOne(
+    {
+        "id": "6665c194a03d529a494ce28d", // Quiz ID
+        "participants._id": "6665c19aa03d529a494ce292" // Participant ID
+    },
+    {
+        $set: {
+            "participants.$.final_score": 85, // Final score baru
+            "participants.$.status": "COMPLETED" // Status baru
+        }
+    }
+);

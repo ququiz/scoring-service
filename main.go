@@ -40,7 +40,7 @@ func main() {
 
 	h := server.Default(
 		server.WithHostPorts(fmt.Sprintf(`0.0.0.0:%s`, cfg.HTTP.Port)),
-		server.WithExitWaitTime(4*time.Second),
+		server.WithExitWaitTime(5*time.Second),
 	)
 	h.Use(accesslog.New(accesslog.WithLogConditionFunc(func(ctx context.Context, c *app.RequestContext) bool {
 		if c.FullPath() == "/healthz" {
