@@ -18,6 +18,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/route"
 	"github.com/hertz-contrib/cors"
 	"github.com/hertz-contrib/logger/accesslog"
 	"github.com/hertz-contrib/pprof"
@@ -80,6 +81,7 @@ func main() {
 	if err != nil {
 		zap.L().Fatal("Newclient gprc (main)", zap.Error(err))
 	}
+	defer cc.Close() // close auth grpc connection when graceful shutdown to avoid memory leaks
 
 	// rpc client
 	quizQueryClient := webapi.NewQuizQueryClient(cfg)
@@ -100,6 +102,12 @@ func main() {
 		c.JSON(http.StatusOK, "service is healthy")
 	}) // health probes
 	router.LeaderboardRouter(h, scoringSvc)
+
+	// graceful shutdown
+	var callback []route.CtxCallback
+
+	callback = append(callback, mongo.Close, rds.Close, rmq.Close) // graceful shutdown
+	h.Engine.OnShutdown = append(h.Engine.OnShutdown, callback...)
 
 	h.Spin()
 }

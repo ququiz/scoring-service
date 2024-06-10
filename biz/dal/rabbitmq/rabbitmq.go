@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"context"
 	"ququiz/lintang/scoring-service/config"
 
 	"github.com/streadway/amqp"
@@ -43,7 +44,7 @@ func NewRabbitMQ(cfg *config.Config) *RabbitMQ {
 
 }
 
-func (r *RabbitMQ) Close() error {
+func (r *RabbitMQ) Close(ctx context.Context) {
 
-	return r.Connection.Close()
+	r.Connection.Close()
 }

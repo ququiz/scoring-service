@@ -20,8 +20,11 @@ func NewQuizQueryClient(cfg *config.Config) *QuizQueryClient {
 	if err != nil {
 		zap.L().Fatal(" quizqueryservice.NewClient")
 	}
+
 	return &QuizQueryClient{c}
 }
+
+
 
 func (q *QuizQueryClient) GetParticipantsUserIDs(ctx context.Context, quizID string) ([]string, string, error) {
 	grpcCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
