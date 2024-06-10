@@ -31,7 +31,7 @@ func NewRabbitMQ(cfg *config.Config) *RabbitMQ {
 
 	err = channel.ExchangeDeclare(
 		"scoring-notification",
-		"topic",
+		"direct",
 		true,
 		false,
 		false,
@@ -39,7 +39,7 @@ func NewRabbitMQ(cfg *config.Config) *RabbitMQ {
 		nil,
 	)
 	if err != nil {
-		zap.L().Fatal("err: channel.ExchangeDeclare : scoring-notification " + err.Error())
+		zap.L().Fatal("err: channel.ExchangeDeclare scoring-notification : " + err.Error())
 	}
 
 	err = channel.Qos(
@@ -49,27 +49,6 @@ func NewRabbitMQ(cfg *config.Config) *RabbitMQ {
 	if err != nil {
 		zap.L().Fatal("err: channel.Qos" + err.Error())
 	}
-
-	channel.QueueDeclare(
-		"user-add-score",
-		false, // durable
-		false, // delete when unused
-		true,  // exclusive
-		false, // no-wait
-		nil,   // arguments
-	)
-	channel.QueueBind(
-		"user-add-score",
-		"correct-answer",
-		"scoring-quiz-query",
-		false,
-		nil,
-	)
-	// error duplicate queue gak usah dihandle
-	// if err != nil {
-	// 	zap.L().Fatal("cant create new queue user-add-score (r.rmq.Channel.QueueDeclare) (ListenAndServe) (RMQConsumer) ", zap.Error(err))
-
-	// }
 
 	return &RabbitMQ{
 		Connection: conn,
