@@ -58,6 +58,13 @@ func NewRabbitMQ(cfg *config.Config) *RabbitMQ {
 		false, // no-wait
 		nil,   // arguments
 	)
+	channel.QueueBind(
+		"user-add-score",
+		"correct-answer",
+		"scoring-quiz-query",
+		false,
+		nil,
+	)
 	// error duplicate queue gak usah dihandle
 	// if err != nil {
 	// 	zap.L().Fatal("cant create new queue user-add-score (r.rmq.Channel.QueueDeclare) (ListenAndServe) (RMQConsumer) ", zap.Error(err))

@@ -28,17 +28,7 @@ func NewQuizQueryMQConsumer(r *RabbitMQ, l LeaderboardRedis) *QuizQueryMQConsume
 const rabbitMQConsumerName = "scoring-svc-consumer"
 
 func (r *QuizQueryMQConsumer) ListenAndServe() error {
-	
-	err := r.rmq.Channel.QueueBind(
-		"user-add-score",
-		"correct-answer",
-		"scoring-quiz-query",
-		false,
-		nil,
-	)
-	if err != nil {
-		zap.L().Fatal(fmt.Sprintf("cant bind queue %s to exchange scoring-quiz-query", "user-add-score"))
-	}
+
 	msgs, err := r.rmq.Channel.Consume(
 		"user-add-score",
 		rabbitMQConsumerName,
