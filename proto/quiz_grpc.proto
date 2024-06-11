@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package ququiz.lintang.quiz_query.pc;
+option go_package = "quiz-query-service/pb";
+
+//  
+message GetQuestionReq {
+    string question_id =1;
+    string quiz_id=2;
+}
+
+
+message GetQuestionRes {
+    string correct_choice_id = 1;
+    string correct_essay_answer_id = 2;
+    uint64 weight = 3;
+} 
+
+
+
+message GetQuizParticipantsReq {
+    string quiz_id = 1;
+}
+
+message GetQuizParticipantRes {
+    repeated string user_ids =1;
+    string quiz_name =2;
+}
+
+
+
+
+service QuizQueryService  {
+    rpc GetQuestionDetail(GetQuestionReq) returns (GetQuestionRes);
+    rpc GetQuizParticipants(GetQuizParticipantsReq) returns (GetQuizParticipantRes);
+}
+
+
+

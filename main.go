@@ -77,14 +77,20 @@ func main() {
 
 	// grpc conn
 	//grpc
-	cc, err := grpcGo.NewClient(cfg.GRPC.AuthGRPCClient+"?wait=30s", grpcGo.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpcGo.NewClient(cfg.GRPC.AuthGRPCClient+"?wait=40s", grpcGo.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		zap.L().Fatal("Newclient gprc (main)", zap.Error(err))
 	}
 	defer cc.Close() // close auth grpc connection when graceful shutdown to avoid memory leaks
 
 	// rpc client
-	quizQueryClient := webapi.NewQuizQueryClient(cfg)
+	zap.L().Debug("quiz query grpc url: " + cfg.GRPC.QueryQueryGRPC)
+	qCC, err := grpcGo.NewClient(cfg.GRPC.QueryQueryGRPC+"?wait=40s", grpcGo.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		zap.L().Debug("target quizquery grpc url"+qCC.CanonicalTarget())
+		zap.L().Fatal("Newclient gprc (main) QueryQueryGRPC", zap.Error(err))
+	}
+	quizQueryClient := webapi.NewQuizQueryClient(qCC)
 	authClient := webapi.NewAuthClient(cc)
 
 	// repo

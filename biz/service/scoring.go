@@ -9,7 +9,8 @@ import (
 )
 
 type QuizQueryClient interface {
-	GetParticipantsUserIDs(ctx context.Context, quizID string) ([]string, string, error)
+	// GetParticipantsUserIDs(ctx context.Context, quizID string) ([]string, string, error)
+	GetParticipantsUserIDs(ctx context.Context, quizId string) ([]string, string, error)
 }
 
 type QuizMongoRepo interface {

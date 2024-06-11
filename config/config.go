@@ -41,15 +41,15 @@ type (
 	}
 
 	GRPC struct {
-		URLGrpc string `json:"urlGRPC" yaml:"urlGRPC" env:"URL_GRPC"`
-		QueryQueryGRPC string `json:"quizQueryGRPCURL" yaml:"quizQueryGRPC" env:"QUIZ_QUERY_GRPC_URL"`
+		URLGrpc        string `json:"urlGRPC"  env:"URL_GRPC"`
+		QueryQueryGRPC string `json:"quizQueryGRPCURL"  env:"QUIZ_QUERY_GRPC_URL"`
 		AuthGRPCClient string `json:"AuthGRPCClient" env:"AUTH_GRPC_CLIENT"`
 	}
 
 	Mongodb struct {
-		MongoURL      string `json:"mongo_url" yaml:"mongoURL" env:"MONGO_URL"`
+		MongoURL      string `json:"mongo_url"  env:"MONGO_URL"`
 		Database      string `json:"mongo_db" env:"MONGO_DB"`
-		MongoWriteURL string `json:"mongo_write_url" yaml:"mongoWriteURL" env:"MONGO_WRITE_URL"`
+		MongoWriteURL string `json:"mongo_write_url"env:"MONGO_WRITE_URL"`
 	}
 
 	Redis struct {
@@ -58,7 +58,7 @@ type (
 	}
 
 	RabbitMQ struct {
-		RMQAddress string `json:"rabbitmqAddress" yaml:"rmqAddress" env:"RABBITMQ_ADDRESS"`
+		RMQAddress string `json:"rabbitmqAddress"  env:"RABBITMQ_ADDRESS"`
 	}
 )
 

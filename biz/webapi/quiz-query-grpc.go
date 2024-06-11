@@ -2,43 +2,67 @@ package webapi
 
 import (
 	"context"
-	"ququiz/lintang/scoring-service/config"
-	"ququiz/lintang/scoring-service/kitex_gen/quiz-query-service/pb"
-	"ququiz/lintang/scoring-service/kitex_gen/quiz-query-service/pb/quizqueryservice"
+	"fmt"
+	"ququiz/lintang/scoring-service/biz/domain"
+	"ququiz/lintang/scoring-service/pb"
 	"time"
 
-	"github.com/cloudwego/kitex/client"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
 
+// type QuizQueryClient struct {
+// 	service quizqueryservice.Client
+// }
+
+// func NewQuizQueryClient(cfg *config.Config) *QuizQueryClient {
+// 	c, err := quizqueryservice.NewClient("quizQueryGRPCService", client.WithHostPorts(cfg.QueryQueryGRPC))
+// 	if err != nil {
+// 		zap.L().Fatal(" quizqueryservice.NewClient", zap.Error(err))
+// 	}
+
+// 	return &QuizQueryClient{c}
+// }
+
+// func (q *QuizQueryClient) GetParticipantsUserIDs(ctx context.Context, quizID string) ([]string, string, error) {
+// 	grpcCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+
+// 	req := &pb.GetQuizParticipantsReq{
+// 		QuizId: quizID,
+// 	}
+
+// 	res, err := q.service.GetQuizParticipants(grpcCtx, req)
+// 	if err != nil {
+// 		zap.L().Error("q.service.GetQuizParticipants (GetParticipantsUserIDs) (QuizQueryClient)", zap.Error(err))
+// 		return []string{}, "", err
+// 	}
+// 	return res.UserIds, res.QuizName, nil
+// }
+
 type QuizQueryClient struct {
-	service quizqueryservice.Client
+	service pb.QuizQueryServiceClient
 }
 
-func NewQuizQueryClient(cfg *config.Config) *QuizQueryClient {
-	c, err := quizqueryservice.NewClient("quizQueryGRPCService", client.WithHostPorts(cfg.QueryQueryGRPC))
-	if err != nil {
-		zap.L().Fatal(" quizqueryservice.NewClient", zap.Error(err))
-	}
+func NewQuizQueryClient(cc *grpc.ClientConn) *QuizQueryClient {
+	svc := pb.NewQuizQueryServiceClient(cc)
 
-	return &QuizQueryClient{c}
+	return &QuizQueryClient{service: svc}
 }
 
-
-
-func (q *QuizQueryClient) GetParticipantsUserIDs(ctx context.Context, quizID string) ([]string, string, error) {
-	grpcCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func (q *QuizQueryClient) GetParticipantsUserIDs(ctx context.Context, quizId string) ([]string, string, error) {
+	grpcCtx, cancel := context.WithTimeout(context.Background(), 4 * time.Second)
 	defer cancel()
 
+	zap.L().Debug(fmt.Sprintf(`quizID: %s`, quizId))
 	req := &pb.GetQuizParticipantsReq{
-		QuizId: quizID,
+		QuizId: quizId,
 	}
-
-	
 	res, err := q.service.GetQuizParticipants(grpcCtx, req)
 	if err != nil {
 		zap.L().Error("q.service.GetQuizParticipants (GetParticipantsUserIDs) (QuizQueryClient)", zap.Error(err))
-		return []string{}, "", err 
+		return []string{}, "",domain.WrapErrorf(err, domain.ErrInternalServerError, domain.MessageInternalServerError)
 	}
-	return res.UserIds, res.QuizName, nil 
+
+	return res.UserIds, res.QuizName, nil
 }

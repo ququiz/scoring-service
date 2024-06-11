@@ -14,6 +14,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 # Step 3: Final
 FROM alpine
+
+RUN  ulimit -n 65536
+RUN  ulimit -u 65536 
 COPY --from=builder /app/config /config
 COPY --from=builder /app/k8s.env .
 COPY --from=builder /app/.env .
