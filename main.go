@@ -14,6 +14,8 @@ import (
 	"ququiz/lintang/scoring-service/pkg"
 	"time"
 
+	"github.com/hertz-contrib/gzip"
+
 	"github.com/bytedance/gopkg/util/gopool"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -48,6 +50,7 @@ func main() {
 		}
 		return true
 	}))) // jangan pake acess log zap (bikin latency makin tinggi)
+	h.Use(gzip.Gzip(gzip.DefaultCompression)) // gzip compress
 	// setup cors
 	corsHandler := cors.New(cors.Config{
 		AllowAllOrigins:  true,
@@ -87,7 +90,7 @@ func main() {
 	zap.L().Debug("quiz query grpc url: " + cfg.GRPC.QueryQueryGRPC)
 	qCC, err := grpcGo.NewClient(cfg.GRPC.QueryQueryGRPC+"?wait=40s", grpcGo.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		zap.L().Debug("target quizquery grpc url"+qCC.CanonicalTarget())
+		zap.L().Debug("target quizquery grpc url" + qCC.CanonicalTarget())
 		zap.L().Fatal("Newclient gprc (main) QueryQueryGRPC", zap.Error(err))
 	}
 	quizQueryClient := webapi.NewQuizQueryClient(qCC)

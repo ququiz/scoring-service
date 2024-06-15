@@ -51,7 +51,7 @@ func NewQuizQueryClient(cc *grpc.ClientConn) *QuizQueryClient {
 }
 
 func (q *QuizQueryClient) GetParticipantsUserIDs(ctx context.Context, quizId string) ([]string, string, error) {
-	grpcCtx, cancel := context.WithTimeout(context.Background(), 4 * time.Second)
+	grpcCtx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	defer cancel()
 
 	zap.L().Debug(fmt.Sprintf(`quizID: %s`, quizId))
