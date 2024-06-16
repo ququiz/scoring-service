@@ -17,12 +17,12 @@ type ScoringService interface {
 }
 
 type LeaderboardHandler struct {
-	svc ScoringService
+	Svc ScoringService
 }
 
 func LeaderboardRouter(r *server.Hertz, s ScoringService) {
 	handler := &LeaderboardHandler{
-		svc: s,
+		Svc: s,
 	}
 
 	root := r.Group("/api/v1")
@@ -62,7 +62,7 @@ func (l *LeaderboardHandler) GetLeaderboard(ctx context.Context, c *app.RequestC
 		c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 		return
 	}
-	leaderboard, err := l.svc.GetLeaderboard(ctx, req.QuizID)
+	leaderboard, err := l.Svc.GetLeaderboard(ctx, req.QuizID)
 	if err != nil {
 		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 		return
@@ -72,7 +72,7 @@ func (l *LeaderboardHandler) GetLeaderboard(ctx context.Context, c *app.RequestC
 }
 
 type recapQuizReq struct {
-	QuizID string `path:"quizID"`
+	QuizID string `path:"quizID" vd:"regexp('^\\w') && len($) == 24;  msg:'quizID haruslah a-z,A-Z,0-9'"`
 }
 
 type dkronRes struct {
@@ -88,7 +88,7 @@ func (l *LeaderboardHandler) RecapQuiz(ctx context.Context, c *app.RequestContex
 		return
 	}
 
-	err = l.svc.RecapQuiz(ctx, req.QuizID)
+	err = l.Svc.RecapQuiz(ctx, req.QuizID)
 	if err != nil {
 		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 		return
